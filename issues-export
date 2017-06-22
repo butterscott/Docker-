@@ -1,0 +1,33 @@
+# Create a custom docker image
+
+# Load testing
+
+# Research software requirements
+We'll need to know what software is required by workshops. After a list of required software is compiled, we'll set everything up in docker containers (i.e. build new images with necessary software - notebook and SSH container).
+
+# DNS managements - *.workshops.adsauiuc.com
+We will need to create an A `*.workshops.adsauiuc.com` to point to a AWS elastic IP address. Alternatively, we can use a CNAME pointing to a host that is managed by a different DNS.
+
+# Set up a reverse proxy
+Since we will be having multiple web services running on the same VM, we'll need a way to elegantly organize access to these services.
+
+I suggest creating a reverse proxy, e.g. using Nginx, to do the following:
+- All incoming HTTPS traffic on host `jupyter.workshops.adsauiuc.com`, will be forwarded to `localhost` port `8080`.
+- All incoming HTTP(S) traffic on host `rstudio.workshops.adsauiuc.com`, will be forwarded to `localhost` port `XXXX` (whatever port we decide Rstudio will listen to)
+
+SSH traffic will be handled independently (as it is now).
+
+# RStudio Server
+- [ ] http://planspace.org/20150221-rstudio_in_a_web_browser/
+
+# Custom SSH authentication and isolated container entrypoint
+When a user logs in by running:
+    ssh username@workshops.adsauiuc.com
+
+The server should find `username` in the users database and validate the password.
+If authentication is successful, the server should start a script that starts a docker container in which the user can work. (The reason behind this is so that we can limit resources (such as CPU, RAM) and avoid doing stuff like configuring folder permissions, etc.)
+
+This guid looks promising: https://support.asperasoft.com/hc/en-us/articles/216127348-Getting-PAM-to-authenticate-against-MySQL
+
+# More robust provisioning
+Consider improving the current shell script to support multiple runs, or consider using tools like Ansible, Puppet, Chef, etc.
